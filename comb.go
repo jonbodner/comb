@@ -1,6 +1,7 @@
 package comb
 
 import (
+	"github.com/jonbodner/sets"
 	"sync"
 )
 
@@ -11,38 +12,11 @@ func PermutationOrig(max int) [][]int {
 	out := [][]int{}
 	inner := PermutationOrig(max - 1)
 	for _, v := range inner {
-		for i := 0;i<=len(v);i++ {
+		for i := 0; i <= len(v); i++ {
 			out = append(out, buildNext(v, i, max))
 		}
 	}
 	return out
-}
-
-func CPermutationOrig(max int) <-chan []int {
-	out := make(chan []int)
-	var innerFunc func(int)
-	innerFunc = func(m int) {
-		if m == 1 {
-			out <- []int{1}
-		}
-		inner := innerFunc(m-1)
-		for _, v := range inner {
-			for i := 0;i<len(v);i++ {
-				out = append(out, buildNext(v,i,m))
-			}
-		}
-	}
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		innerFunc(max)
-	}()
-	go func() {
-		wg.Wait()
-		close(out)
-	}()
-	return out	
 }
 
 func buildNext(v []int, i int, max int) []int {
@@ -93,7 +67,11 @@ func PermutationPartial(max int, pick int) [][]int {
 	return out
 }
 
-func PermutationPartialParallel(max int, pick int) <-chan []int {
+func CPermutation(max int) <-chan []int {
+	return CPermutationPartial(max, max)
+}
+
+func CPermutationPartial(max int, pick int) <-chan []int {
 	out := make(chan []int)
 	var visit func(int, int, []int)
 	visit = func(k int, depth int, val []int) {
@@ -113,13 +91,13 @@ func PermutationPartialParallel(max int, pick int) <-chan []int {
 		val[depth] = 0
 	}
 
-	var wg sync.WaitGroup	
+	var wg sync.WaitGroup
 	go func() {
-		for i := 1;i<=max;i++ {
+		for i := 1; i <= max; i++ {
 			wg.Add(1)
 			go func(start int) {
 				defer wg.Done()
-				visit(start, pick, make([]int,pick))
+				visit(start, pick, make([]int, pick))
 			}(i)
 		}
 		wg.Wait()
@@ -128,12 +106,27 @@ func PermutationPartialParallel(max int, pick int) <-chan []int {
 	return out
 }
 
-func Combination(max int) [][]int {
-	out := [][]int{}
-	return out
-}
+func Combination(max int, pick int) []sets.IntSet {
+	val := sets.IntSet{}
+	out := []sets.IntSet{}
+	var visit func(int, int)
+	visit = func(k int, depth int) {
+		depth--
+		val.Add(k)
+		if depth == 0 {
+			out = append(out, val.Copy())
+		} else {
+			for i := k + 1; i <= max; i++ {
+				if !val.Contains(i) {
+					visit(i, depth)
+				}
+			}
+		}
+		val.Remove(k)
+	}
 
-func CombinationPartial(max int, pick int) [][]int {
-	out := [][]int{}
+	for i := 1; i <= max; i++ {
+		visit(i, pick)
+	}
 	return out
 }

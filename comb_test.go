@@ -1,6 +1,7 @@
 package comb
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -62,4 +63,51 @@ func TestPermutationPartial(t *testing.T) {
 		result := PermutationPartial(k[0], k[1])
 		validateResults(t, k, v, result)
 	}
+}
+
+func TestIncomplete(t *testing.T) {
+	out := CPermutationPartial(3, 3)
+	for p := range out {
+		fmt.Println(p)
+	}
+
+	out = CPermutationPartial(3, 2)
+	for p := range out {
+		fmt.Println(p)
+	}
+
+	out = CPermutationPartial(3, 1)
+	for p := range out {
+		fmt.Println(p)
+	}
+
+	out2 := PermutationPartial(3, 3)
+	fmt.Println(out2)
+
+	out2 = PermutationPartial(3, 2)
+	fmt.Println(out2)
+
+	out2 = PermutationPartial(3, 1)
+	fmt.Println(out2)
+
+	out3 := Combination(3, 3)
+	fmt.Println(out3)
+
+	out3 = Combination(3, 2)
+	fmt.Println(out3)
+
+	out3 = Combination(3, 1)
+	fmt.Println(out3)
+
+	out3 = Combination(4, 4)
+	fmt.Println(out3)
+
+	out3 = Combination(4, 3)
+	fmt.Println(out3)
+
+	out3 = Combination(4, 2)
+	fmt.Println(out3)
+
+	out3 = Combination(4, 1)
+	fmt.Println(out3)
 }
