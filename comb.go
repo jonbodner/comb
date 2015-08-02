@@ -106,7 +106,78 @@ func CPermutationPartial(max int, pick int) <-chan []int {
 	return out
 }
 
-func Combination(max int, pick int) []sets.IntSet {
+func Combination(max int, num int) []sets.IntSet {
+	v := make([]int, max)
+	for k := 0; k < max; k++ {
+		v[k] = k
+	}
+	return combInner(sets.IntSet{}, v, num)
+}
+
+func combInner(used sets.IntSet, vals []int, toKeep int) []sets.IntSet {
+	if len(vals)+len(used) < toKeep {
+		return []sets.IntSet{}
+	}
+	out := []sets.IntSet{}
+	for i :=0;i<len(vals);i++ {
+		start := used.Copy()
+		start.Add(vals[i])
+		if len(start) == toKeep {
+			out = append(out, start)
+		} else {
+			out = append(out, combInner(start,vals[i+1:],toKeep)...)
+		}
+	}
+
+	return out
+}
+
+func CombinationConc(max int, num int) []sets.IntSet {
+	v := make([]int, max)
+	for k := 0; k < max; k++ {
+		v[k] = k
+	}
+	c := make(chan sets.IntSet)
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		combInnerConc(sets.IntSet{}, v, num,c)
+	}()
+	go func() {
+		defer close(c)
+		wg.Wait()
+	}()
+	out := []sets.IntSet{}
+	for s := range c {
+		out = append(out, s)
+	}
+	return out
+}
+
+func combInnerConc(used sets.IntSet, vals []int, toKeep int, c chan sets.IntSet) {
+	if len(vals)+len(used) < toKeep {
+		return
+	}
+	var wg sync.WaitGroup
+	for i :=0;i<len(vals);i++ {
+		start := used.Copy()
+		start.Add(vals[i])
+		if len(start) == toKeep {
+			c <- start
+		} else {
+			wg.Add(1)
+			go func(i int) {
+				defer wg.Done()
+				combInnerConc(start,vals[i+1:],toKeep, c)
+			}(i)
+		}
+	}
+	wg.Wait()
+}
+
+func CombinationOrig(max int, pick int) []sets.IntSet {
 	val := sets.IntSet{}
 	out := []sets.IntSet{}
 	var visit func(int, int)

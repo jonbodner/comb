@@ -5,6 +5,18 @@ import (
 	"testing"
 )
 
+func BenchmarkPermutation(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Permutation(6)
+	}
+}
+
+func BenchmarkPermutationOrig(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		PermutationOrig(6)
+	}
+}
+
 func validateResults(t *testing.T, k interface{}, v [][]int, result [][]int) {
 	if len(result) != len(v) {
 		t.Errorf("wrong length of result: %v, %v, %v", k, v, result)
@@ -42,6 +54,13 @@ func TestPermutation(t *testing.T) {
 	}
 }
 
+func TestPermutationOrig(t *testing.T) {
+	for k, v := range permResults {
+		result := PermutationOrig(k)
+		validateResults(t, k, v, result)
+	}
+}
+
 var permPartialResults = map[[2]int][][]int{
 	[2]int{1, 1}: [][]int{{1}},
 	[2]int{2, 2}: [][]int{{2, 1}, {1, 2}},
@@ -63,6 +82,27 @@ func TestPermutationPartial(t *testing.T) {
 		result := PermutationPartial(k[0], k[1])
 		validateResults(t, k, v, result)
 	}
+}
+
+func TestCombination(t *testing.T) {
+	fmt.Println("TestCombination")
+	for i := 1;i<=5;i++ {
+		for j := 1; j <=i;j++ {
+			fmt.Println("comb(",i,",",j,"): ",Combination(i,j))
+
+		}
+	}
+}
+
+func TestCombinationConc(t *testing.T) {
+	fmt.Println("TestCombinationConc")
+	for i := 1;i<=5;i++ {
+		for j := 1; j <=i;j++ {
+			fmt.Println("comb(",i,",",j,"): ",CombinationConc(i,j))
+
+		}
+	}
+
 }
 
 func TestIncomplete(t *testing.T) {
